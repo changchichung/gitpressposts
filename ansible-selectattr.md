@@ -85,7 +85,7 @@ author: "Eric Chang"
 - name: load teams.yml
   tags: env
   include_vars:
-    file: files/konwen/teams.yml
+    file: files/kw/teams.yml
 ```
 這時候在這個執行階段，就會有一個變數叫 teams 裡面有 chinese_name/description/gid 等等這些屬性
 

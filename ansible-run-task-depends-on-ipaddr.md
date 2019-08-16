@@ -89,7 +89,7 @@ hwaddress: f4:4d:30:45:ef:aa', host: pc120', ipv4: 192.168.1.120', user: [wany']
 ```
 - name: get internet user ip list
   set_fact:
-    iuser_ip_list: "{{ ch['client_hosts']['konwen.com'] |selectattr('iuser', 'defined')| map(attribute='ipv4')|list }}"
+    iuser_ip_list: "{{ ch['client_hosts']['kw.com'] |selectattr('iuser', 'defined')| map(attribute='ipv4')|list }}"
 
 - name: add proxy to /etc/environment
   blockinfile:
