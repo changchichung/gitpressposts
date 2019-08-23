@@ -153,3 +153,14 @@ barman@barman:~$
 
 應該會再找時間來重作一台，然後順便測試看看restore
 
+
+update
+
+剛剛又做了一次測試，config 都一樣
+
+果然要先做 barman cron/barman switch-xlog hqs019-ssh 
+
+然後再做 barman check 就可以通過了
+
+在文件裡面很少提到這部份，筆記一下，用ansible 去跑的時候才不會忘記
+
