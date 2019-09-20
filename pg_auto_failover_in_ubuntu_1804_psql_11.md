@@ -62,7 +62,7 @@ sudo apt install postgresql-11-auto-failover -y
 postgresql 的相關執行檔路徑，預設不會載入到PATH變數中，所以要自己手動增加
 
 直接加入 /etc/environment ，或者是去修改使用者的 .profile 載入正確的 $PATH 都可以
-````
+```
 #replace PATH variable in /etc/environment
 PATH="/usr/lib/postgresql/11/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games"
 
