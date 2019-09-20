@@ -639,3 +639,324 @@ postgres=#
 設定簡單、快速、方便，設定完成後也不用傷腦筋，反正有異常，會自動幫你搞定master-slave之間的主從關係
 
 資料也都會自動同步好，真的是非常推薦啊！
+
+UPDATE
+
+#### 將 pg_auto_failover 用 systemd 管理
+
+每次都要手動執行 pg_autoctl run 太麻煩了，應該用systemd 或者是 supervisor 來管理
+
+而pg_auto_failover 有指令可以做成 systemd 的service 檔案
+
+既然人家都做好了，當然就直接用 systemd 來做
+
+執行以下指令，產生 systemd configuration
+
+```
+sudo runuser -l postgres -c "pg_autoctl -q show systemd" | sudo tee /etc/systemd/system/pgautofailover.service
+```
+在/etc/systemd/system底下會多出一個 pgautofailover.service檔案
+
+內容就是 pg_auto_failover 所提供的 systemd config
+
+接下來就可以直接用 sudo service pgautofailover start 來啟動
+
+沒有什麼問題，不過呢，這樣的作法，會在 /var/log/syslog 塞滿了 pg_auto_failover 的紀錄
+```
+Sep 20 14:59:34 pg-primary systemd[1]: Started pg_auto_failover.
+Sep 20 14:59:34 pg-primary pg_autoctl[7817]: 14:59:34 INFO  Managing PostgreSQL installation at "/var/lib/postgresql/11/main"
+Sep 20 14:59:34 pg-primary pg_autoctl[7817]: 14:59:34 INFO  Found a stale pidfile at "/tmp/pg_autoctl/var/lib/postgresql/11/main/pg_autoctl.pid"
+Sep 20 14:59:34 pg-primary pg_autoctl[7817]: 14:59:34 WARN  Removing the stale pid file "/tmp/pg_autoctl/var/lib/postgresql/11/main/pg_autoctl.pid"
+Sep 20 14:59:34 pg-primary pg_autoctl[7817]: 14:59:34 INFO  The version of extenstion "pgautofailover" is "1.0" on the monitor
+Sep 20 14:59:34 pg-primary pg_autoctl[7817]: 14:59:34 INFO  pg_autoctl service is starting
+Sep 20 14:59:34 pg-primary pg_autoctl[7817]: 14:59:34 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 14:59:39 pg-primary pg_autoctl[7817]: 14:59:39 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 14:59:44 pg-primary pg_autoctl[7817]: 14:59:44 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 14:59:49 pg-primary pg_autoctl[7817]: 14:59:49 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 14:59:54 pg-primary pg_autoctl[7817]: 14:59:54 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 14:59:59 pg-primary pg_autoctl[7817]: 14:59:59 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:00:04 pg-primary pg_autoctl[7817]: 15:00:04 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:00:09 pg-primary pg_autoctl[7817]: 15:00:09 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:00:15 pg-primary pg_autoctl[7817]: 15:00:14 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:00:20 pg-primary pg_autoctl[7817]: 15:00:20 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:00:25 pg-primary pg_autoctl[7817]: 15:00:25 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:00:30 pg-primary pg_autoctl[7817]: 15:00:30 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:00:35 pg-primary pg_autoctl[7817]: 15:00:35 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:00:40 pg-primary pg_autoctl[7817]: 15:00:40 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:00:45 pg-primary pg_autoctl[7817]: 15:00:45 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:00:50 pg-primary pg_autoctl[7817]: 15:00:50 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:00:55 pg-primary pg_autoctl[7817]: 15:00:55 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:01:00 pg-primary pg_autoctl[7817]: 15:01:00 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:01:05 pg-primary pg_autoctl[7817]: 15:01:05 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:01:10 pg-primary pg_autoctl[7817]: 15:01:10 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:01:15 pg-primary pg_autoctl[7817]: 15:01:15 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:01:20 pg-primary pg_autoctl[7817]: 15:01:20 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:01:25 pg-primary pg_autoctl[7817]: 15:01:25 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:01:30 pg-primary pg_autoctl[7817]: 15:01:30 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:01:35 pg-primary pg_autoctl[7817]: 15:01:35 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:01:40 pg-primary pg_autoctl[7817]: 15:01:40 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:01:45 pg-primary pg_autoctl[7817]: 15:01:45 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:01:50 pg-primary pg_autoctl[7817]: 15:01:50 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:01:55 pg-primary pg_autoctl[7817]: 15:01:55 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:02:00 pg-primary pg_autoctl[7817]: 15:02:00 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:02:05 pg-primary pg_autoctl[7817]: 15:02:05 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:02:10 pg-primary pg_autoctl[7817]: 15:02:10 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:02:15 pg-primary pg_autoctl[7817]: 15:02:15 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:02:20 pg-primary pg_autoctl[7817]: 15:02:20 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:02:25 pg-primary pg_autoctl[7817]: 15:02:25 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:02:30 pg-primary pg_autoctl[7817]: 15:02:30 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:02:35 pg-primary pg_autoctl[7817]: 15:02:35 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:02:40 pg-primary pg_autoctl[7817]: 15:02:40 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:02:46 pg-primary pg_autoctl[7817]: 15:02:46 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:02:51 pg-primary pg_autoctl[7817]: 15:02:51 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:02:56 pg-primary pg_autoctl[7817]: 15:02:56 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:03:01 pg-primary pg_autoctl[7817]: 15:03:01 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:03:06 pg-primary pg_autoctl[7817]: 15:03:06 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:03:11 pg-primary pg_autoctl[7817]: 15:03:11 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:03:16 pg-primary pg_autoctl[7817]: 15:03:16 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:03:21 pg-primary pg_autoctl[7817]: 15:03:21 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:03:26 pg-primary pg_autoctl[7817]: 15:03:26 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:03:31 pg-primary pg_autoctl[7817]: 15:03:31 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:03:36 pg-primary pg_autoctl[7817]: 15:03:36 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:03:41 pg-primary pg_autoctl[7817]: 15:03:41 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:03:46 pg-primary pg_autoctl[7817]: 15:03:46 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:03:51 pg-primary pg_autoctl[7817]: 15:03:51 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:03:57 pg-primary pg_autoctl[7817]: 15:03:57 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:04:02 pg-primary pg_autoctl[7817]: 15:04:02 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:04:07 pg-primary pg_autoctl[7817]: 15:04:07 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:04:12 pg-primary pg_autoctl[7817]: 15:04:12 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:04:17 pg-primary pg_autoctl[7817]: 15:04:17 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:04:22 pg-primary pg_autoctl[7817]: 15:04:22 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:04:27 pg-primary pg_autoctl[7817]: 15:04:27 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:04:32 pg-primary pg_autoctl[7817]: 15:04:32 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:04:37 pg-primary pg_autoctl[7817]: 15:04:37 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:04:42 pg-primary pg_autoctl[7817]: 15:04:42 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:04:47 pg-primary pg_autoctl[7817]: 15:04:47 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+Sep 20 15:04:52 pg-primary pg_autoctl[7817]: 15:04:52 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+```
+
+這樣下去不用多久，syslog 一定爆，而且嚴重干擾到其他的系統訊息
+
+所以要修改一下 config ，把log 寫到另外的檔案去
+
+在/etc/systemd/system/pgautofailover.service 加入底下兩行
+```
+StandardOutput=file:/var/log/pgautofailover.log
+StandardError=file:/var/log/pgautofailover-error.log
+```
+然後 sudo systemctl daemon-reload 接著重起 sudo service pgautofailover restart
+
+就會把訊息都寫到 /var/log/pgautofailover.log , /var/log/pgautofailover-error.log
+
+再用 logrotate 來管理就可以了
+
+這個動作需要在三台node都執行
+
+不過我在想應該是可以不要產生那麼多log ，只要紀錄 critical 就好了？來試試看加入 LogLevelMax=3 的效果
+
+在 /etc/systemd/system/pgautofailover.service 檔案中的service 區段 加入
+```
+LogLevelMax=3
+```
+loglevel 的等級定義看這邊
+
+https://www.ctrl.blog/entry/systemd-log-levels.html
+
+
+* emergency (0)
+* alert (1)
+* critical (2)
+* error (3)
+* warning (4)
+* notice (5)
+* info (6)
+* debug (7)
+
+完成後，一樣執行
+
+```
+sudo systemctl daemon-reload
+sudo service pgautofailover restart
+```
+看一下檔案內容，怎麼就沒有訊息了！
+```
+2019-09-20 15:23:15 [administrator@pg-primary ~]$ sudo tail -30 /var/log/pgautofailover.log 
+15:14:22 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:14:27 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:14:32 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:14:37 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:14:42 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:14:47 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:14:52 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:14:57 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:15:02 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:15:07 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:15:12 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:15:17 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:15:22 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:15:27 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:15:32 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:15:37 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:15:42 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:15:47 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:15:52 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:15:58 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:16:03 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:16:08 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:16:13 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:16:18 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:16:23 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:16:28 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:16:34 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:16:39 INFO  Calling node_active for node default/1/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 0.
+15:16:39 WARN  Smart shutdown: received signal Terminated
+15:16:39 INFO  pg_autoctl service stopping
+2019-09-20 15:23:29 [administrator@pg-primary ~]$ 
+```
+
+可是我的服務活著啊！
+
+```
+2019-09-20 15:23:29 [administrator@pg-primary ~]$ sudo service pgautofailover status
+● pgautofailover.service - pg_auto_failover
+   Loaded: loaded (/etc/systemd/system/pgautofailover.service; disabled; vendor preset: enabled)
+   Active: active (running) since Fri 2019-09-20 15:16:39 CST; 7min ago
+ Main PID: 8611 (pg_autoctl)
+    Tasks: 1 (limit: 2321)
+   CGroup: /system.slice/pgautofailover.service
+           └─8611 /usr/bin/pg_autoctl run
+
+Sep 20 15:16:39 pg-primary systemd[1]: Started pg_auto_failover.
+2019-09-20 15:23:56 [administrator@pg-primary ~]$
+```
+
+拿另一台來做實驗，先不要加入 loglevelmax=3 ，看看log到底長怎樣！
+
+```
+2019-09-20 07:25:34 [administrator@pg-slave ~]$ sudo service pgautofailover stop
+2019-09-20 07:25:58 [administrator@pg-slave ~]$ sudo tail -10 /var/log/syslog
+Sep 20 07:25:32 pg-slave pg_autoctl[5840]: 07:25:32 INFO  Calling node_active for node default/4/0 with current state: primary, PostgreSQL is running, sync_state is "sync", WAL delta is 0.
+Sep 20 07:25:37 pg-slave pg_autoctl[5840]: 07:25:37 INFO  Calling node_active for node default/4/0 with current state: primary, PostgreSQL is running, sync_state is "sync", WAL delta is 0.
+Sep 20 07:25:42 pg-slave pg_autoctl[5840]: 07:25:42 INFO  Calling node_active for node default/4/0 with current state: primary, PostgreSQL is running, sync_state is "sync", WAL delta is 0.
+Sep 20 07:25:47 pg-slave pg_autoctl[5840]: 07:25:47 INFO  Calling node_active for node default/4/0 with current state: primary, PostgreSQL is running, sync_state is "sync", WAL delta is 0.
+Sep 20 07:25:52 pg-slave pg_autoctl[5840]: 07:25:52 INFO  Calling node_active for node default/4/0 with current state: primary, PostgreSQL is running, sync_state is "sync", WAL delta is 0.
+Sep 20 07:25:57 pg-slave pg_autoctl[5840]: 07:25:57 INFO  Calling node_active for node default/4/0 with current state: primary, PostgreSQL is running, sync_state is "sync", WAL delta is 0.
+Sep 20 07:25:58 pg-slave systemd[1]: Stopping pg_auto_failover...
+Sep 20 07:25:58 pg-slave pg_autoctl[5840]: 07:25:58 WARN  Smart shutdown: received signal Terminated
+Sep 20 07:25:58 pg-slave pg_autoctl[5840]: 07:25:58 INFO  pg_autoctl service stopping
+Sep 20 07:25:58 pg-slave systemd[1]: Stopped pg_auto_failover.
+```
+
+好吧，看不出有什麼差別！ 直接把primary 關機測試！ 結果還是看不出來 0rz
+
+放棄加入loglevel 的想法，就用logrotate 來管理吧！
+
+UPDATE
+
+用systemd 來管理的作法失敗了，重起之後， pgautofailover 不會自動啟動...
+
+找了很久找不出原因，改用 supervisor來做好了
+
+***
+
+#### 設定 supervisor
+
+**安裝supervisor**
+```
+sudo apt install supervisor
+sudo vim /etc/supervisor/conf.d/pgautofailover.conf
+加入以下內容
+[program:pgautofailover]
+command = pg_autoctl run
+user = postgres
+autostart=true
+autorestart=true
+redirect_stderr = true
+environment=PGDATA=/var/lib/postgresql/11/main,HOME=/var/lib/postgresql
+```
+重新啟動 supervisor & 檢查狀態
+```
+2019-09-20 17:26:22 [administrator@pg-primary postgresql]$ sudo service supervisor restart
+2019-09-20 17:26:57 [administrator@pg-primary postgresql]$ sudo supervisorctl status
+pgautofailover                   RUNNING   pid 14554, uptime 0:00:05
+2019-09-20 17:27:03 [administrator@pg-primary postgresql]$ 
+```
+檢查 supervisor log
+```
+2019-09-20 17:27:03 [administrator@pg-primary postgresql]$ sudo tail -30 /var/log/supervisor/pgautofailover-stdout---supervisor-5V8qET.log 
+17:26:58 INFO  Managing PostgreSQL installation at "/var/lib/postgresql/11/main"
+17:26:58 INFO  Found a stale pidfile at "/tmp/pg_autoctl/var/lib/postgresql/11/main/pg_autoctl.pid"
+17:26:58 WARN  Removing the stale pid file "/tmp/pg_autoctl/var/lib/postgresql/11/main/pg_autoctl.pid"
+17:26:58 INFO  The version of extenstion "pgautofailover" is "1.0" on the monitor
+17:26:58 INFO  pg_autoctl service is starting
+17:26:58 INFO  Calling node_active for node default/1/0 with current state: primary, PostgreSQL is running, sync_state is "sync", WAL delta is 0.
+17:27:03 INFO  Calling node_active for node default/1/0 with current state: primary, PostgreSQL is running, sync_state is "sync", WAL delta is 0.
+17:27:08 INFO  Calling node_active for node default/1/0 with current state: primary, PostgreSQL is running, sync_state is "sync", WAL delta is 0.
+17:27:13 INFO  Calling node_active for node default/1/0 with current state: primary, PostgreSQL is running, sync_state is "sync", WAL delta is 0.
+17:27:18 INFO  Calling node_active for node default/1/0 with current state: primary, PostgreSQL is running, sync_state is "sync", WAL delta is 0.
+2019-09-20 17:27:21 [administrator@pg-primary postgresql]$ 
+```
+
+簡單多了 ... 在剩下的monitor/slave 也一樣操作安裝、設定supervisor 就可以了
+
+喔，順便把剛剛新增的 systemd config 給砍了..
+
+不過不砍也沒差，反正開機也不會自己啟動 = =+
+
+```
+2019-09-20 17:24:17 [administrator@pg-slave ~]$ sudo rm -rf /etc/systemd/system/pgautofailover.service
+#安裝supervisor
+2019-09-20 17:23:08 [administrator@pg-slave ~]$ sudo apt install supervisor
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+The following additional packages will be installed:
+  python-meld3 python-pkg-resources
+Suggested packages:
+  python-setuptools supervisor-doc
+The following NEW packages will be installed:
+  python-meld3 python-pkg-resources supervisor
+0 upgraded, 3 newly installed, 0 to remove and 167 not upgraded.
+Need to get 415 kB of archives.
+After this operation, 2,138 kB of additional disk space will be used.
+Do you want to continue? [Y/n] y
+Get:1 http://archive.ubuntu.com/ubuntu bionic/main amd64 python-pkg-resources all 39.0.1-2 [128 kB]
+Get:2 http://archive.ubuntu.com/ubuntu bionic/universe amd64 python-meld3 all 1.0.2-2 [30.9 kB]
+Get:3 http://archive.ubuntu.com/ubuntu bionic/universe amd64 supervisor all 3.3.1-1.1 [256 kB]
+Fetched 415 kB in 0s (6,752 kB/s)   
+Selecting previously unselected package python-pkg-resources.
+(Reading database ... 103586 files and directories currently installed.)
+Preparing to unpack .../python-pkg-resources_39.0.1-2_all.deb ...
+Unpacking python-pkg-resources (39.0.1-2) ...
+Selecting previously unselected package python-meld3.
+Preparing to unpack .../python-meld3_1.0.2-2_all.deb ...
+Unpacking python-meld3 (1.0.2-2) ...
+Selecting previously unselected package supervisor.
+Preparing to unpack .../supervisor_3.3.1-1.1_all.deb ...
+Unpacking supervisor (3.3.1-1.1) ...
+Processing triggers for ureadahead (0.100.0-20) ...
+Setting up python-meld3 (1.0.2-2) ...
+Setting up python-pkg-resources (39.0.1-2) ...
+Setting up supervisor (3.3.1-1.1) ...
+Created symlink /etc/systemd/system/multi-user.target.wants/supervisor.service → /lib/systemd/system/supervisor.service.
+Processing triggers for systemd (237-3ubuntu10.29) ...
+Processing triggers for man-db (2.8.3-2) ...
+Processing triggers for ureadahead (0.100.0-20) ...
+2019-09-20 17:23:37 [administrator@pg-slave ~]$ sudo vim /etc/supervisor/conf.d/pgautofailover.conf
+#貼上上面的 conf 內容
+2019-09-20 17:30:12 [administrator@pg-slave ~]$ sudo service supervisor restart
+2019-09-20 17:30:58 [administrator@pg-slave ~]$ sudo supervisorctl status
+pgautofailover                   RUNNING   pid 2232, uptime 0:00:04
+2019-09-20 17:31:03 [administrator@pg-slave ~]$ sudo tail -30 /var/log/supervisor/pgautofailover-stdout---supervisor-LC_FG8.log 
+17:30:59 INFO  Managing PostgreSQL installation at "/var/lib/postgresql/11/main"
+17:30:59 INFO  Found a stale pidfile at "/tmp/pg_autoctl/var/lib/postgresql/11/main/pg_autoctl.pid"
+17:30:59 WARN  Removing the stale pid file "/tmp/pg_autoctl/var/lib/postgresql/11/main/pg_autoctl.pid"
+17:30:59 INFO  The version of extenstion "pgautofailover" is "1.0" on the monitor
+17:30:59 INFO  pg_autoctl service is starting
+17:30:59 INFO  Calling node_active for node default/4/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 320.
+17:31:04 INFO  Calling node_active for node default/4/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 320.
+17:31:09 INFO  Calling node_active for node default/4/0 with current state: secondary, PostgreSQL is running, sync_state is "", WAL delta is 320.
+2019-09-20 17:31:13 [administrator@pg-slave ~]$ 
+```
+
+搞定，收工！準備寫 ansible playbook！
