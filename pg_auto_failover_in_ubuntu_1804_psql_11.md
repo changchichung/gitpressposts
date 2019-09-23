@@ -960,3 +960,25 @@ pgautofailover                   RUNNING   pid 2232, uptime 0:00:04
 ```
 
 搞定，收工！準備寫 ansible playbook！
+
+
+***
+UPDATE
+
+新增用logrotate 來管理 pgautofailover logfile
+
+```
+sudo vim /etc/logrotate.d/pgautofailover
+
+/var/log/supervisor/pgautofail*.log {
+    daily
+    rotate 7                                                         
+    copytruncate
+    delaycompress    # today and yesterday will not compress
+    compress
+    missingok
+    notifempty
+}    
+
+```
+
