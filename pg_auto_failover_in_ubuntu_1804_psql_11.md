@@ -27,6 +27,10 @@ https://github.com/citusdata/pg_auto_failover
 
 基本的邏輯是 一台 monitor , 一台 master/primary node ，一台 slave/secondary node 組成一個cluster
 
+官方提供的架構圖如下
+
+![pg_auto_failover architecture](https://i.imgur.com/SyPFXZ1.png)
+
 當master/primary node 上面的 postgresql 服務死掉了，slave/secondary node 會自動接手
 
 等到master/primary node 回來之後，會自動降級為 slave/secondary node
