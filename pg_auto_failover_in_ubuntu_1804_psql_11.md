@@ -985,4 +985,23 @@ sudo vim /etc/logrotate.d/pgautofailover
 }    
 
 ```
+UPDATE
+
+當node 消失，需要手動在monitor上執行以下指令來移除node ，才能夠再次加入新的node
+
+```
+2019-09-24 01:11:09 [administrator@monitor ~]$ sudo runuser -l postgres -c "psql postgres://autoctl_node@monitor:5432/pg_auto_failover"
+psql (11.5 (Ubuntu 11.5-1.pgdg18.04+1))
+Type "help" for help.
+
+pg_auto_failover=> select pgautofailover.remove_node('pg-third')        
+pg_auto_failover-> ;
+ remove_node 
+-------------
+ t
+(1 row)
+
+pg_auto_failover=> 
+```
+
 
