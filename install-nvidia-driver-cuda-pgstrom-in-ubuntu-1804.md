@@ -189,6 +189,25 @@ https://github.com/heterodb/pg-strom
 
 總之，目前在ubuntu 18.04 + postgresql-11 的環境下編譯是沒有問題了
 
+## UPDATE
+
+今天拿到一張 GTX 1050 ti ，想說終於可以來測試看看 pg_strom 了
+
+不過發現在ubuntu 底下，照著這篇操作還是會有問題
+
+在做完git clone 要 make 之前，要先執行底下兩行指令
+
+其中的 11 是 postgresql 版本，要依照自己安裝的版本做調整
+
+```
+sudo ln -snf /usr/lib/postgresql/11/lib/libpgcommon.a /usr/lib/x86_64-linux-gnu/libpgcommon.a
+sudo ln -snf /usr/lib/postgresql/11/lib/libpgport.a /usr/lib/x86_64-linux-gnu/libpgport.a
+
+```
+
+接著再去 make 就沒問題了
+
+
 ```
 git clone https://github.com/heterodb/pg-strom.git
 cd pg-strom
