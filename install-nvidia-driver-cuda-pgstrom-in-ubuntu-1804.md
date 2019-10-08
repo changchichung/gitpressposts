@@ -38,6 +38,7 @@ keywords:
 ```
 sudo add-apt-repository ppa:graphics-drivers/ppa
 sudo apt update
+sudo apt install ubuntu-drivers-common
 ```
 然後用這個指令
 ```
