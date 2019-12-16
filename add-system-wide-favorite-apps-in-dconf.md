@@ -4,7 +4,7 @@ date: 2019-12-16T13:59:26+08:00
 draft: false
 noSummary: false
 categories: ['筆記']
-image: [https://h.cowbay.org/images/post-default-2.jpg]
+image: https://h.cowbay.org/images/post-default-2.jpg
 tags: ['ubuntu','dconf']
 author: "Eric Chang"
 keywords:
