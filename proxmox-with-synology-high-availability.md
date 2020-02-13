@@ -59,12 +59,25 @@ https://www.synology.com/zh-tw/knowledgebase/DSM/help/HighAvailability/split_bra
 
 而promox 這邊，在synology恢復之後，也可以正常存取NFS ，所以也沒有問題
 
-那問題就是在VM裡面了，當發生了某些狀況，讓系統進入read only ，就必須透過reboot 才能解決
 
-或者是看看這個指令用fsck去檢查filesystem 看看有沒有幫助
+~~那問題就是在VM裡面了，當發生了某些狀況，讓系統進入read only ，就必須透過reboot 才能解決~~
+
+~~或者是看看這個指令用fsck去檢查filesystem 看看有沒有幫助~~
 
 ```
 sudo fsck -Af -M
 ```
+
+UPDATE:
+
+在proxmox 論壇上提出了這個問題，有回覆說要用 NFS Version 4.1
+
+經過測試，在掛載NFS share folder 時，如果有指定 NFS Version 4.1
+
+那在HA Cluster 恢復之後，VM也就跟著恢復正常
+
+不必再重開機了！
+
+所以這問題算是解決了！
 
 
