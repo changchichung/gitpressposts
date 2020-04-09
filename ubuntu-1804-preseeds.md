@@ -110,7 +110,7 @@ sudo systemctl enable rc-local
 
 ubuntu 18.04 preseeds files
 
-````
+```
 # Title: Ubuntu 18.04 preseed.cfg
 #
 # File: templates/os-ubuntu-1804-amd64-preseed.cfg
