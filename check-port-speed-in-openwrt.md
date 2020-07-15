@@ -488,12 +488,3 @@ strongswan 的設定又囉唆，該是讓他退場的時候了！
 
 ![](https://i.imgur.com/QwQLH2V.png)
 
-
-
-
-
-
-=== delete below content when finish the post ===
-youtbe: {{< youtube w7Ft2ymGmfc >}} 
-IG photo: {{< instagram BWNjjyYFxVx >}}
-
