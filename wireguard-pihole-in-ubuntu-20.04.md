@@ -223,3 +223,102 @@ www.google.com.tw.	297	IN	A	64.233.177.94
 2020-08-13 15:42:24 [root@hqdc039 wireguard]$ 
 ```
 
+### UPDATE
+
+更新一下開啟 pihole DOT (DNS Over TLS) 的方式
+
+##### 安裝並建立相關目錄
+
+```bash
+sudo apt update
+sudo apt install stubby
+sudo mkdir /var/cache/stubby
+```
+
+##### 修改 /etc/stubby/stubby.yml
+
+編輯 /etc/stubby/stubby.yml 改成以下內容
+
+```yaml
+resolution_type: GETDNS_RESOLUTION_STUB
+
+dns_transport_list:
+  - GETDNS_TRANSPORT_TLS
+
+tls_authentication: GETDNS_AUTHENTICATION_REQUIRED
+
+tls_query_padding_blocksize: 128
+
+edns_client_subnet_private : 1
+
+round_robin_upstreams: 1
+
+idle_timeout: 10000
+
+tls_connection_retries: 5
+
+xtls_ca_path: "/etc/ssl/certs/"
+
+################################ LISTEN ADDRESS ################################
+# Set the listen addresses for the stubby DAEMON. This specifies localhost IPv4
+# and IPv6. It will listen on port 53 by default. Use <IP_address>@<port> to
+# specify a different port
+listen_addresses:
+  - 127.0.0.1@5453
+
+appdata_dir: "/var/cache/stubby"
+
+upstream_recursive_servers:
+   - address_data: 145.100.185.15
+     tls_auth_name: "dnsovertls.sinodun.com"
+   - address_data: 1.1.1.1
+     tls_auth_name: "cloudflare-dns.com"
+
+## Quad 9 'secure' service - Filters, does DNSSEC, doesn't send ECS
+#  - address_data: 9.9.9.9
+#    tls_auth_name: "dns.quad9.net"
+## Quad 9 'insecure' service - No filtering, does DNSSEC, may send ECS (it is
+## unclear if it honours the edns_client_subnet_private request from stubby)
+#  - address_data: 9.9.9.10
+#    tls_auth_name: "dns.quad9.net"
+## Cloudflare 1.1.1.1 and 1.0.0.1
+#  - address_data: 1.1.1.1
+#    tls_auth_name: "cloudflare-dns.com"
+#  - address_data: 1.0.0.1
+#    tls_auth_name: "cloudflare-dns.com"
+## The Uncensored DNS servers
+#  - address_data: 89.233.43.71
+#    tls_auth_name: "unicast.censurfridns.dk"
+#    tls_pubkey_pinset:
+#      - digest: "sha256"
+#        value: wikE3jYAA6jQmXYTr/rbHeEPmC78dQwZbQp6WdrseEs=
+## Fondation RESTENA (NREN for Luxembourg)
+#  - address_data: 158.64.1.29
+#    tls_auth_name: "kaitain.restena.lu"
+#    tls_pubkey_pinset:
+#      - digest: "sha256"
+#        value: 7ftvIkA+UeN/ktVkovd/7rPZ6mbkhVI7/8HnFJIiLa4=
+## Google
+#  - address_data: 8.8.8.8
+#    tls_auth_name: "dns.google"
+#  - address_data: 8.8.4.4
+#    tls_auth_name: "dns.google"
+
+```
+
+重啟 stubby service
+
+```shell
+sudo service tubby restart
+```
+
+##### 修改pihole 相關設定
+
+開啟 pihole web 管理界面 settings -> dns -> 左邊預設的DNS 都不要選，在右邊的 custom 1(IPV4) 填入 
+
+存檔後離開
+```
+127.0.0.1#5453
+```
+
+
